@@ -1,0 +1,23 @@
+{
+	"files.associations": {
+		"*.html": "html",
+		"*.development": "properties",
+		"*.sql": "sql",
+		"*.production": "properties",
+		"minishell.h": "c",
+		"parsing.h": "c",
+		"utils.h": "c",
+		"environment.h": "c",
+		"ast.h": "c",
+		"*.bak": "cpp",
+		"execution.h": "c",
+		"tokenisation.h": "c",
+		"cstdlib": "c",
+		"signals.h": "c",
+		"libft.h": "c",
+		"stdlib.h": "c",
+		"unistd.h": "c",
+		"mini_signals.h": "c"
+	},
+	"makefile.configureOnOpen": true
+}
