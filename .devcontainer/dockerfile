@@ -4,28 +4,62 @@ FROM debian:bullseye-slim
 # Set environment variables for non-interactive installations
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install required packages: libc6-dev for pthread and time functions
+# Install required packages for C/C++ development and debugging
 RUN apt-get update && apt-get install -y --no-install-recommends \
-	build-essential \
-	libc6-dev \
-	libreadline-dev \
-	valgrind \
-	make \
-	gdb \
-	git \
-	python3 \
-	python3-pip \
-	&& apt-get clean && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    clang \
+    clangd \
+    lldb \
+    gdb \
+    libc6-dev \
+    libreadline-dev \
+    valgrind \
+    make \
+    cmake \
+    git \
+    python3 \
+    python3-pip \
+    curl \
+    wget \
+    procps \
+    strace \
+    # ltrace is removed as it's not available in the ARM64 repository
+    man-db \
+    less \
+    bash-completion \
+    # Cleanup to reduce image size
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and setuptools, and install norminette
+# Upgrade pip and setuptools, and install norminette for 42 coding style
 RUN python3 -m pip install --upgrade pip setuptools && \
-	python3 -m pip install norminette
+    python3 -m pip install norminette
+
+# Create a non-root user with a dynamic UID/GID that matches the host
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configure bash for a better experience
+RUN echo "alias ll='ls -la'" >> /home/$USERNAME/.bashrc && \
+    echo "export PS1='\[\033[01;32m\]\u@dev\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /home/$USERNAME/.bashrc
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /workspace
 
-# Copy project files into the container
-COPY . .
+# Set permissions to allow building in the mounted volume
+RUN chown -R $USERNAME:$USERNAME /workspace
 
-# Specify the default command (can be overridden)
-CMD ["make"]
+# Set default user (commented out to let VS Code handle user switching)
+# USER $USERNAME
+
+# Command to keep the container running
+CMD ["bash"]

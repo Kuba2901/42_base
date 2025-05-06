@@ -1,32 +1,43 @@
 {
-    "name": "Debian Dev Container",
-    "build": {
-      "dockerfile": "Dockerfile",
-      "context": "."
-    },
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "terminal.integrated.defaultProfile.linux": "bash"
-            },
-            "extensions": [
-                "ms-vscode.cpptools",
-                "ms-vscode.makefile-tools",
-                "ms-vscode.cpptools-extension-pack",
-				"kube.42header"
-            ]
-        }
-    },
-    "mounts": [
-      "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
-    ],
-    "runArgs": [
-      "--cap-add=SYS_PTRACE",  // Required for debugging with GDB
-      "--security-opt=seccomp=unconfined" // Disable security restrictions for ptrace
-    ],
-  
-    "postCreateCommand": "make --version",
-    "workspaceFolder": "/workspace",
-    "remoteUser": "root"
-  }
-  
+	"name": "C/C++ Development Container",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".",
+		"args": {
+			"VARIANT": "bullseye"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"C_Cpp.default.compilerPath": "/usr/bin/clang",
+				"C_Cpp.default.intelliSenseMode": "${localEnv:CODESPACE_NAME ? 'linux-clang-arm64' : 'linux-clang-x64'}",
+				"C_Cpp.default.cStandard": "c17",
+				"C_Cpp.updateChannel": "Insiders",
+				"editor.formatOnSave": true,
+				"files.trimTrailingWhitespace": true,
+				"remote.containers.gitCredentialsProvider": "local"
+			},
+			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
+				"ms-vscode.cpptools-themes",
+				"ms-vscode.makefile-tools",
+				"kube.42header",
+				"xaver.clang-format",
+				"twxs.cmake"
+			]
+		}
+	},
+	"mounts": [
+		"source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached"
+	],
+	"runArgs": [
+		"--cap-add=SYS_PTRACE",
+		"--security-opt=seccomp=unconfined"
+	],
+	"postCreateCommand": "echo 'Development container created. Ready for debugging!'",
+	"workspaceFolder": "/workspace",
+	"remoteUser": "root"
+}
